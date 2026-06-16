@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ЖИ Қолдану Салалары - Интерактивті Сабақ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #020617);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* ЖИ стиліндегі торлы фон эффектісі */
+        .ai-grid {
+            background-image: linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Жылтыраған нейро-жарықтар */
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        }
+    </style>
+</head>
+<body class="ai-grid min-height-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Жоғарғы мәзір (Header) -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 transition-all">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-indigo-600/20 rounded-lg border border-indigo-500/30 text-indigo-400">
+                    <i data-lucide="brain-circuit" class="w-6 h-6 animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-wider bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">AI-Тренажер</h1>
+                    <p class="text-xs text-slate-400">Жасанды Интеллект Салалары</p>
+                </div>
+            </div>
+            <div id="userInfoHeader" class="hidden text-sm bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-full flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span id="headerStudentName" class="text-slate-300 font-medium"></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Негізгі контент -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-8 flex flex-col justify-center">
+        
+        <!-- 1-БЕТ: ОҚУШЫНЫ ТІРКЕУ БЕТІ -->
+        <section id="welcomeScreen" class="bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl rounded-2xl p-8 md:p-12 text-center glow-effect transition-all duration-500">
+            <div class="w-20 h-20 bg-indigo-600/10 border border-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-400 glow-effect">
+                <i data-lucide="user-check" class="w-10 h-10"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white mb-3">Интерактивті Білім Платформасына Қош Келдіңіз!</h2>
+            <p class="text-slate-400 max-w-lg mx-auto mb-8 text-sm md:text-base">
+                Жасанды интеллектің қазіргі замандағы ең өзекті қолдану салаларын зерттеп, біліміңізді 10 балдық жүйемен бағалаңыз.
+            </p>
+
+            <div class="max-w-md mx-auto text-left space-y-4">
+                <div>
+                    <label for="studentNameInput" class="block text-sm font-semibold text-slate-300 mb-2">Оқушының аты-жөні:</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </span>
+                        <input type="text" id="studentNameInput" placeholder="Аты-жөніңізді енгізіңіз..." 
+                            class="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder-slate-500 outline-none transition-all">
+                    </div>
+                    <p id="nameError" class="hidden text-red-400 text-xs mt-1">Жалғастыру үшін аты-жөніңізді жазыңыз!</p>
+                </div>
+
+                <div class="p-4 bg-indigo-950/30 border border-indigo-900/50 rounded-xl space-y-2">
+                    <h4 class="text-sm font-bold text-indigo-300 flex items-center gap-1.5">
+                        <i data-lucide="info" class="w-4 h-4"></i> Тапсырма ережесі:
+                    </h4>
+                    <ul class="text-xs text-slate-400 space-y-1 list-disc list-inside">
+                        <li>Жалпы тапсырма саны: <span class="text-indigo-400 font-semibold">7 тапсырма</span></li>
+                        <li>Бағалау критерийі: <span class="text-indigo-400 font-semibold">10 балдық жүйе</span></li>
+                        <li>Соңында қатемен жұмыс жасау мүмкіндігі беріледі</li>
+                    </ul>
+                </div>
+
+                <button onclick="startTest()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                    Тренажерді бастау <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ТЕСТТЕР МЕН ТАПСЫРМАЛАР БӨЛІМІ -->
+        <section id="testScreen" class="hidden space-y-6">
+            <!-- Прогресс бары -->
+            <div class="bg-slate-900/40 border border-slate-800/60 p-4 rounded-xl flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span id="questionCounter" class="text-sm font-bold text-indigo-400 bg-indigo-950/60 px-3 py-1 rounded-lg border border-indigo-900/50">1/7 Тапсырма</span>
+                    <span id="taskTypeBadge" class="text-xs text-purple-300 bg-purple-950/40 border border-purple-900/40 px-2.5 py-1 rounded-md">Тест</span>
+                </div>
+                <div class="w-1/3 bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                    <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-300" style="width: 14%"></div>
+                </div>
+            </div>
+
+            <!-- Сауалнама карточкасы -->
+            <div id="questionCard" class="bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl rounded-2xl p-6 md:p-8 glow-effect min-h-[300px] flex flex-col justify-between">
+                <div>
+                    <!-- Сұрақтың сипаттамасы мен мазмұны -->
+                    <div class="mb-6">
+                        <span id="taskCategory" class="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-2">Медицинадағы ЖИ</span>
+                        <h3 id="questionText" class="text-xl md:text-2xl font-bold text-white leading-relaxed">Сұрақ мәтіні осында жүктеледі...</h3>
+                    </div>
+
+                    <!-- Опциялар орны (Әртүрлі интерфейс түрлеріне арналған) -->
+                    <div id="optionsContainer" class="space-y-3">
+                        <!-- Жауаптар динамикалы түрде осында салынады -->
+                    </div>
+                </div>
+
+                <!-- Бағыттау батырмалары -->
+                <div class="mt-8 pt-6 border-t border-slate-800 flex justify-between items-center">
+                    <p class="text-xs text-slate-500">Әрбір дұрыс жауап болашақтағы қатемен жұмысқа сақталады.</p>
+                    <button id="nextBtn" onclick="submitAnswerAndNext()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-xl transition-all flex items-center gap-2">
+                        Келесі <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ҚОРЫТЫНДЫ ЖӘНЕ БАҒАЛАУ БЕТІ -->
+        <section id="resultScreen" class="hidden space-y-6">
+            <div class="bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl rounded-2xl p-8 md:p-12 text-center glow-effect">
+                <div class="relative w-36 h-36 mx-auto mb-6 flex items-center justify-center">
+                    <!-- Айналмалы бағалау бары -->
+                    <svg class="absolute inset-0 w-full h-full transform -rotate-90">
+                        <circle cx="72" cy="72" r="64" stroke="#1e293b" stroke-width="8" fill="transparent"></circle>
+                        <circle id="scoreRing" cx="72" cy="72" r="64" stroke="#6366f1" stroke-width="8" fill="transparent" 
+                            stroke-dasharray="402" stroke-dashoffset="402" stroke-linecap="round" class="transition-all duration-1000"></circle>
+                    </svg>
+                    <div class="text-center z-10">
+                        <span id="finalScore" class="text-4xl md:text-5xl font-extrabold text-white block">0</span>
+                        <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Балл / 10</span>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2">
+                    Құттықтаймыз, <span id="resultStudentName" class="text-indigo-400"></span>!
+                </h2>
+                
+                <!-- Бағаның деңгейлік талдауы -->
+                <p id="gradeComment" class="text-slate-300 max-w-md mx-auto mb-6 text-sm md:text-base">
+                    Тренажер нәтижесі жүктелуде...
+                </p>
+
+                <!-- Статистика блоктары -->
+                <div class="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-8 text-center">
+                    <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-xl">
+                        <span class="text-xs text-slate-400 block mb-1">Сұрақ саны</span>
+                        <strong class="text-lg text-white">7</strong>
+                    </div>
+                    <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-xl">
+                        <span class="text-xs text-slate-400 block mb-1">Дұрысы</span>
+                        <strong id="correctStats" class="text-lg text-emerald-400">0</strong>
+                    </div>
+                    <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-xl">
+                        <span class="text-xs text-slate-400 block mb-1">Қатесі</span>
+                        <strong id="incorrectStats" class="text-lg text-red-400">0</strong>
+                    </div>
+                </div>
+
+                <!-- Әрекет жасау батырмалары -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+                    <button onclick="openCorrectionPage()" class="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="shield-alert" class="w-5 h-5"></i> Қатемен жұмыс жасау
+                    </button>
+                    <button onclick="restartApp()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Қайта тапсыру
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ҚАТЕМЕН ЖҰМЫС ІСТЕУ БЕТІ -->
+        <section id="correctionScreen" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Қатемен жұмыс парағы</h2>
+                    <p class="text-xs text-slate-400">Жіберілген қателерді зерттеп, біліміңізді толықтырыңыз</p>
+                </div>
+                <button onclick="backToResults()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Нәтижелерге оралу
+                </button>
+            </div>
+
+            <!-- Қателер тізімі осында шығады -->
+            <div id="correctionList" class="space-y-4">
+                <!-- Динамикалық қателер блоктары -->
+            </div>
+
+            <!-- Оң нәтиже жағдайында (Қате жоқ болса) -->
+            <div id="noErrorsPlaceholder" class="hidden text-center py-12 bg-slate-900/60 border border-slate-800 rounded-2xl">
+                <div class="w-16 h-16 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="sparkles" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-1">Мінсіз нәтиже!</h3>
+                <p class="text-slate-400 text-sm max-w-sm mx-auto">Сіз барлық сұраққа мүлтіксіз дұрыс жауап бердіңіз, қатемен жұмыс істеудің қажеті жоқ.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Төменгі деректер (Footer) -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500 mt-12">
+        <p>&copy; 2026 ЖИ Тренажер • Барлық құқықтар қорғалған.</p>
+    </footer>
+
+    <!-- Логикалық срипттер -->
+    <script>
+        // Тапсырмалар жинағы
+        const questions = [
+            {
+                id: 1,
+                category: "Медицинадағы ЖИ",
+                type: "single", // жалғыз таңдау
+                question: "Жасанды интеллект медицинада ауруды ерте анықтау үшін ең алдымен немен жұмыс істейді?",
+                options: [
+                    "Дәрігерлерді алмастырумен",
+                    "Медициналық суреттерді (Рентген, КТ) талдаумен",
+                    "Дәріханаларды басқарумен",
+                    "Электрондық құжаттарды толтырумен"
+                ],
+                correct: 1, // "Медициналық суреттерді талдаумен"
+                explanation: "ЖИ медицинада рентген, КТ, және МРТ суреттерін миллисекунд ішінде өте дәл талдап, дәрігерге дейін ауру белгілерін немесе ісіктерді анықтап бере алады."
+            },
+            {
+                id: 2,
+                category: "Көліктегі ЖИ",
+                type: "single",
+                question: "Автономды (жүргізушісіз) көліктер жол бетіндегі кедергілерді қалай анықтайды?",
+                options: [
+                    "Арнайы орнатылған LiDAR, камера және сенсорлардың көмегімен",
+                    "Алдын ала жазылған бейнебаянға сүйеніп",
+                    "Спутниктік картадағы фотосуреттермен ғана",
+                    "Адамның дыбыс пәрмені арқылы"
+                ],
+                correct: 0,
+                explanation: "Автономды көліктер LiDAR (лазерлік радарлар), камералар және ультрадыбыстық сенсорлар арқылы айналаны нақты уақыт режимінде 3D модельдеп сканерлейді."
+            },
+            {
+                id: 3,
+                category: "Мәтіндік ЖИ (NLP)",
+                type: "single",
+                question: "ChatGPT немесе басқа Үлкен Тілдік Модельдер (LLM) мәтінді қалай құрастырады?",
+                options: [
+                    "Адамдардың ойын тікелей оқып жазады",
+                    "Алдыңғы сөздердің контекстіне қарап, келесі ең ықтимал сөзді болжау арқылы",
+                    "Дайын шаблон мәтіндерді ғана көшіреді",
+                    "Интернетті тікелей сөзбе-сөз көшіріп басады"
+                ],
+                correct: 1,
+                explanation: "Тілдік модельдер статистикалық заңдылықтарға негізделеді. Олар контекстке қарап ең сәйкес келетін келесі сөздерді кезекпен болжайды."
+            },
+            {
+                id: 4,
+                category: "Қаржы саласындағы ЖИ",
+                type: "single",
+                question: "Банк саласында ЖИ көбінесе қандай маңызды қауіпсіздік қызметін атқарады?",
+                options: [
+                    "Банкоматтардың орнын ауыстыру",
+                    "Карточкалық транзакциялардағы алаяқтық пен күмәнді операцияларды жылдам анықтау (Fraud Detection)",
+                    "Ақшаны қолмен санау",
+                    "Барлық салымшылардың пайыздық сыйақысын жою"
+                ],
+                correct: 1,
+                explanation: "Банктер ЖИ алгоритмдерін миллиондаған операцияларды бақылауға қояды. Қалыптан тыс алаяқтық әрекет немесе күмәнді аударым анықталса, жүйе оны дереу бұғаттайды."
+            },
+            {
+                id: 5,
+                category: "Өнеркәсіп пен Робототехника",
+                type: "single",
+                question: "Компьютерлік көру (Computer Vision) өндірісте ең алдымен не үшін қолданылады?",
+                options: [
+                    "Тауарларды тасымалдау шығындарын есептеу",
+                    "Өндірістегі өнім сапасын тексеру және ақауы бар тауарларды (дефект) автоматты сұрыптау",
+                    "Кеңсе жұмысшыларына кофе дайындау",
+                    "Зауыт жұмысшыларының жалақысын реттеу"
+                ],
+                correct: 1,
+                explanation: "Компьютерлік көру камералары өндіріс конвейеріндегі өнімдерді секундына ондаған рет суретке түсіріп, ақауын автоматты түрде тауып, жарамсыз деп бөліп отырады."
+            },
+            {
+                id: 6,
+                category: "Ұсыныс Жүйелері (Recommender Systems)",
+                type: "single",
+                question: "YouTube немесе Netflix сізге ұнайтын бейнелерді қалайша нақты ұсына алады?",
+                options: [
+                    "Олар кездейсоқ бейнероликтерді таңдайды",
+                    "Сіздің бұрын қараған көрсетілімдеріңіз бен талғамыңызды талдап, сәйкес алгоритмдерді қосады",
+                    "Тек ең көп қаралым жинаған трендтерді көрсетеді",
+                    "Әр елдің мемлекеттік телеарнасының жоспарына сүйенеді"
+                ],
+                correct: 1,
+                explanation: "Ұсыныс жүйелері пайдаланушының бұрын қараған контенттеріне, оған қалдырған пікірлеріне және уақытына сүйеніп, математикалық сәйкестік арқылы контент ұсынады."
+            },
+            {
+                id: 7,
+                category: "Ауыл Шаруашылығы және ЖИ",
+                type: "single",
+                question: "Ақылды ауыл шаруашылығында (Smart Farming) ЖИ дрондары қандай рөл атқарады?",
+                options: [
+                    "Арамшөптер мен егін ауруларын әуеден сканерлеп, тек қажетті жерлерге ғана тыңайтқыш себуді бағыттайды",
+                    "Жабайы аңдарды егістіктен алысқа қуумен айналысады",
+                    "Егін жинаушы жұмысшыларды бақылап отырады",
+                    "Тек ауа райын болжаумен ғана шектеледі"
+                ],
+                correct: 0,
+                explanation: "Дрондар мен ЖИ егістік алқабының картасын жасап, қай аймақта өсімдіктің ауырып немесе құрғап жатқанын талдайды және суды/дәріні үнемдеуге мүмкіндік береді."
+            }
+        ];
+
+        // Күй айнымалылары (State variables)
+        let currentQuestionIndex = 0;
+        let studentName = "";
+        let selectedAnswers = {}; // {questionId: selectedOptionIndex}
+
+        // Құжат толық жүктелгенде белгішелерді іске қосу
+        window.onload = function() {
+            lucide.createIcons();
+        };
+
+        // Тестті бастау функциясы
+        function startTest() {
+            const nameInput = document.getElementById("studentNameInput").value.trim();
+            const errorElement = document.getElementById("nameError");
+
+            if (nameInput === "") {
+                errorElement.classList.remove("hidden");
+                return;
+            } else {
+                errorElement.classList.add("hidden");
+            }
+
+            studentName = nameInput;
+            
+            // Жоғарғы жақта аты-жөнін көрсету
+            document.getElementById("headerStudentName").innerText = studentName;
+            document.getElementById("userInfoHeader").classList.remove("hidden");
+            
+            // Келесі бетке ауысу
+            document.getElementById("welcomeScreen").classList.add("hidden");
+            document.getElementById("testScreen").classList.remove("hidden");
+
+            // Бірінші сұрақты құру
+            loadQuestion(currentQuestionIndex);
+        }
+
+        // Сұрақты визуалды жүктеу
+        function loadQuestion(index) {
+            const q = questions[index];
+            
+            // Прогресс барын жаңарту
+            const total = questions.length;
+            const progressPercent = ((index + 1) / total) * 100;
+            document.getElementById("progressBar").style.width = progressPercent + "%";
+            document.getElementById("questionCounter").innerText = `${index + 1}/${total} Тапсырма`;
+            
+            // Санат пен сұрақ мәтіні
+            document.getElementById("taskCategory").innerText = q.category;
+            document.getElementById("questionText").innerText = q.question;
+
+            // Жауап нұсқалары орнын тазарту және жаңасын қосу
+            const container = document.getElementById("optionsContainer");
+            container.innerHTML = "";
+
+            q.options.forEach((option, idx) => {
+                const isSelected = selectedAnswers[q.id] === idx;
+                const optionBtn = document.createElement("button");
+                optionBtn.className = `w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between group ${
+                    isSelected 
+                    ? "bg-indigo-600/20 border-indigo-500 text-white font-medium" 
+                    : "bg-slate-950/40 border-slate-800 text-slate-300 hover:bg-slate-850 hover:border-slate-700"
+                }`;
+                
+                optionBtn.onclick = () => selectOption(q.id, idx);
+                
+                // Жауап нұсқасының белгішесі мен мәтіні
+                const alphabet = ["A", "B", "C", "D"];
+                optionBtn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                            isSelected 
+                            ? "bg-indigo-500 text-white" 
+                            : "bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-indigo-400 group-hover:border-indigo-500/30"
+                        }">${alphabet[idx]}</span>
+                        <span class="text-sm md:text-base">${option}</span>
+                    </div>
+                    <div class="w-5 h-5 rounded-full border ${
+                        isSelected 
+                        ? "border-indigo-400 bg-indigo-500 flex items-center justify-center text-white" 
+                        : "border-slate-700"
+                    }">
+                        ${isSelected ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                    </div>
+                `;
+                container.appendChild(optionBtn);
+            });
+
+            // "Келесі" немесе "Аяқтау" мәтінін жаңарту
+            const nextBtn = document.getElementById("nextBtn");
+            if (index === total - 1) {
+                nextBtn.innerHTML = `Нәтижені көру <i data-lucide="check-circle-2" class="w-4 h-4"></i>`;
+            } else {
+                nextBtn.innerHTML = `Келесі <i data-lucide="chevron-right" class="w-4 h-4"></i>`;
+            }
+            lucide.createIcons();
+        }
+
+        // Жауапты таңдау логикасы
+        function selectOption(questionId, optionIdx) {
+            selectedAnswers[questionId] = optionIdx;
+            // Қайта жүктеп таңдалған күйді көрсету
+            loadQuestion(currentQuestionIndex);
+        }
+
+        // Нәтижені есептеу және келесі бетке өту
+        function submitAnswerAndNext() {
+            const currentQ = questions[currentQuestionIndex];
+            
+            // Тексеру: жауап таңдалды ма?
+            if (selectedAnswers[currentQ.id] === undefined) {
+                // Арнайы визуалды хабарлама
+                const card = document.getElementById("questionCard");
+                card.classList.add("border-red-500/50", "animate-shake");
+                setTimeout(() => {
+                    card.classList.remove("border-red-500/50", "animate-shake");
+                }, 500);
+                return;
+            }
+
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion(currentQuestionIndex);
+            } else {
+                calculateResults();
+            }
+        }
+
+        // Нәтижелерді есептеу және көрсету
+        function calculateResults() {
+            let correctCount = 0;
+            
+            questions.forEach(q => {
+                if (selectedAnswers[q.id] === q.correct) {
+                    correctCount++;
+                }
+            });
+
+            // 10 балдық жүйеге ауыстыру (әр сұрақ 1 баллдан асса, 7 сұрақтан 10 балдық жүйеге формуласы)
+            // Формула: (Дұрыс жауап / Жалпы сұрақ) * 10
+            const tenScaleScore = Math.round((correctCount / questions.length) * 10);
+            
+            // Нәтижелерді визуалды енгізу
+            document.getElementById("finalScore").innerText = tenScaleScore;
+            document.getElementById("resultStudentName").innerText = studentName;
+            document.getElementById("correctStats").innerText = correctCount;
+            document.getElementById("incorrectStats").innerText = questions.length - correctCount;
+
+            // Айналмалы бағалау диаграммасы (Circle progress)
+            const ring = document.getElementById("scoreRing");
+            const circumference = 402; // 2 * pi * 64
+            const offset = circumference - (tenScaleScore / 10) * circumference;
+            ring.style.strokeDashoffset = offset;
+
+            // Деңгейлік бағаламаның түсіндірме мәтіндері
+            let comment = "";
+            let colorClass = "";
+            if (tenScaleScore >= 9) {
+                comment = "Керемет көрсеткіш! Сіз Жасанды интеллект қолдану салаларын өте жоғары деңгейде меңгергенсіз. Болашақ ЖИ маманы деуге болады!";
+                ring.setAttribute("stroke", "#10b981"); // Жасыл түс
+            } else if (tenScaleScore >= 7) {
+                comment = "Жақсы нәтиже! Сізде ЖИ технологияларының қалай қолданылатыны туралы берік негіз бар. Кейбір қателерді пысықтау жеткілікті.";
+                ring.setAttribute("stroke", "#3b82f6"); // Көк түс
+            } else if (tenScaleScore >= 4) {
+                comment = "Қанағаттанарлық нәтиже. ЖИ тақырыбы бойынша біліміңізді әлі де дамыту керек. Төмендегі қатемен жұмыс парағын орындап көріңіз.";
+                ring.setAttribute("stroke", "#f59e0b"); // Сары түс
+            } else {
+                comment = "Төмен көрсеткіш. Тақырыпты қайтадан оқып шығуды ұсынамыз. Қатемен жұмыс арқылы жіберілген кемшіліктерді түзетіңіз.";
+                ring.setAttribute("stroke", "#ef4444"); // Қызыл түс
+            }
+            document.getElementById("gradeComment").innerText = comment;
+
+            // Беттерді ауыстыру
+            document.getElementById("testScreen").classList.add("hidden");
+            document.getElementById("resultScreen").classList.remove("hidden");
+        }
+
+        // Қатемен жұмыс істеу бетін ашу
+        function openCorrectionPage() {
+            document.getElementById("resultScreen").classList.add("hidden");
+            document.getElementById("correctionScreen").classList.remove("hidden");
+
+            const correctionList = document.getElementById("correctionList");
+            correctionList.innerHTML = "";
+            let totalErrors = 0;
+
+            questions.forEach((q, index) => {
+                const userAns = selectedAnswers[q.id];
+                const isCorrect = userAns === q.correct;
+
+                if (!isCorrect) {
+                    totalErrors++;
+                    const item = document.createElement("div");
+                    item.className = "bg-slate-900/60 border border-red-500/20 rounded-xl p-5 md:p-6 space-y-3";
+                    
+                    item.innerHTML = `
+                        <div class="flex items-center justify-between border-b border-slate-800/60 pb-3">
+                            <span class="text-xs font-bold text-red-400 bg-red-950/40 border border-red-900/30 px-2.5 py-1 rounded-md flex items-center gap-1">
+                                <i data-lucide="x-circle" class="w-3.5 h-3.5"></i> №${index + 1} Тапсырмада қате кетті
+                            </span>
+                            <span class="text-xs text-slate-400">${q.category}</span>
+                        </div>
+                        <h4 class="text-base font-semibold text-white">${q.question}</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                            <div class="bg-red-950/20 border border-red-900/30 p-3 rounded-lg text-sm">
+                                <span class="text-xs text-red-400 block font-medium mb-1">Сіздің жауабыңыз:</span>
+                                <span class="text-slate-300">${q.options[userAns]}</span>
+                            </div>
+                            <div class="bg-emerald-950/20 border border-emerald-900/30 p-3 rounded-lg text-sm">
+                                <span class="text-xs text-emerald-400 block font-medium mb-1">Дұрыс жауап:</span>
+                                <span class="text-slate-200 font-medium">${q.options[q.correct]}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/80 p-4 rounded-lg border border-slate-800/80 text-sm mt-3">
+                            <span class="text-xs text-indigo-400 block font-bold uppercase tracking-wider mb-1">Түсіндірме:</span>
+                            <p class="text-slate-300 leading-relaxed">${q.explanation}</p>
+                        </div>
+                    `;
+                    correctionList.appendChild(item);
+                }
+            });
+
+            const noErrorsPlaceholder = document.getElementById("noErrorsPlaceholder");
+            if (totalErrors === 0) {
+                noErrorsPlaceholder.classList.remove("hidden");
+            } else {
+                noErrorsPlaceholder.classList.add("hidden");
+            }
+
+            lucide.createIcons();
+        }
+
+        // Түзету бетінен нәтижелерге оралу
+        function backToResults() {
+            document.getElementById("correctionScreen").classList.add("hidden");
+            document.getElementById("resultScreen").classList.remove("hidden");
+        }
+
+        // Тренажерді басынан қайта іске қосу
+        function restartApp() {
+            currentQuestionIndex = 0;
+            selectedAnswers = {};
+            
+            document.getElementById("resultScreen").classList.add("hidden");
+            document.getElementById("welcomeScreen").classList.remove("hidden");
+            document.getElementById("userInfoHeader").classList.add("hidden");
+            document.getElementById("studentNameInput").value = "";
+        }
+    </script>
+</body>
+</html>

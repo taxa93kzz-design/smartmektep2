@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Бәйге - Интерактивті Ойын</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%);
+            min-height: 100vh;
+        }
+        .track-bg {
+            background-image: linear-gradient(to right, #3f3f46 1px, transparent 1px), linear-gradient(to bottom, #3f3f46 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        @keyframes gallop {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(-3deg); }
+        }
+        .galloping {
+            animation: gallop 0.6s infinite ease-in-out;
+        }
+        @keyframes confetti {
+            0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 20px;
+            background: #ffd700;
+            top: 0;
+            opacity: 0;
+            animation: confetti 4s infinite linear;
+        }
+    </style>
+</head>
+<body class="text-white overflow-x-hidden flex flex-col justify-between">
+
+    <!-- Басты Контейнер -->
+    <main class="container mx-auto px-4 py-8 max-w-4xl flex-grow flex flex-col justify-center items-center">
+        
+        <!-- Ойынның Басталу Экраны (Тіркелу) -->
+        <div id="start-screen" class="w-full max-w-md bg-slate-900/90 border border-indigo-500/30 rounded-2xl p-8 shadow-2xl backdrop-blur-md text-center">
+            <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-amber-500 rounded-full mb-4 shadow-lg shadow-amber-500/20">
+                    <i class="fas fa-horse-head text-4xl text-slate-900"></i>
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
+                    PYTHON БӘЙГЕ
+                </h1>
+                <p class="text-slate-300 mt-2 text-sm">Python бағдарламалау тілі бойынша интеллектуалды бәйгеге қош келдіңіз!</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="student-name" class="block text-left text-sm font-semibold text-slate-300 mb-2">Оқушының аты-жөні:</label>
+                    <input type="text" id="student-name" placeholder="Мысалы: Әлихан Аманжол" 
+                        class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition">
+                    <p id="error-message" class="text-red-500 text-xs text-left mt-1 hidden">Аты-жөніңізді енгізіңіз!</p>
+                </div>
+
+                <button id="start-btn" class="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-extrabold text-lg rounded-xl transition duration-300 shadow-lg shadow-orange-500/20 transform hover:-translate-y-0.5">
+                    БӘЙГЕНІ БАСТАУ <i class="fas fa-play ml-2"></i>
+                </button>
+            </div>
+
+            <div class="mt-8 text-xs text-slate-400 border-t border-slate-800 pt-4">
+                Ойын шарттары: 7 сұраққа дұрыс жауап беріп, бәйгеде мәреге бірінші жетіңіз және жеңімпаз Кубогін иеленіңіз!
+            </div>
+        </div>
+
+        <!-- Ойын Экраны -->
+        <div id="game-screen" class="w-full hidden space-y-6">
+            <!-- Ойын тақтасы (Ойыншы және Қарсылас аттары) -->
+            <div class="bg-slate-900/80 border border-indigo-500/20 rounded-2xl p-6 shadow-xl backdrop-blur-md">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase tracking-wider block">Шабандоз</span>
+                        <span id="player-display-name" class="font-bold text-amber-400 text-lg">Әлихан</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider block">Сұрақ деңгейі</span>
+                        <span id="question-counter" class="font-bold text-white text-lg">1 / 7</span>
+                    </div>
+                </div>
+
+                <!-- Шабыс алаңы (Трасса) -->
+                <div class="space-y-4 bg-slate-950 p-4 rounded-xl relative overflow-hidden border border-slate-800">
+                    
+                    <!-- Трасса сызықтары мен Мәре -->
+                    <div class="absolute top-0 bottom-0 right-16 w-1 border-r-2 border-dashed border-red-500 z-10"></div>
+                    <div class="absolute top-2 right-12 text-[10px] text-red-500 font-bold tracking-widest uppercase origin-bottom -rotate-90 z-10">МӘРЕ</div>
+
+                    <!-- Сіздің атыңыз (Ойыншы) -->
+                    <div class="relative h-14 bg-slate-900/50 rounded-lg flex items-center px-2">
+                        <div class="absolute left-2 text-[10px] text-amber-500 font-bold z-10">СІЗ</div>
+                        <!-- Ат белгішесі -->
+                        <div id="player-horse" class="absolute flex flex-col items-center justify-center transition-all duration-1000 left-0" style="width: 50px;">
+                            <span class="text-xs font-semibold text-amber-300 truncate max-w-[60px] mb-0.5" id="horse-tag">Сіз</span>
+                            <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-slate-950 text-xl galloping">
+                                <i class="fas fa-horse"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Қарсылас ат (Бот) -->
+                    <div class="relative h-14 bg-slate-900/50 rounded-lg flex items-center px-2">
+                        <div class="absolute left-2 text-[10px] text-indigo-400 font-bold z-10">ҚАРСЫЛАС</div>
+                        <!-- Қарсылас ат белгішесі -->
+                        <div id="bot-horse" class="absolute flex flex-col items-center justify-center transition-all duration-1000 left-0" style="width: 50px;">
+                            <span class="text-xs font-semibold text-indigo-300 mb-0.5">Тұлпар</span>
+                            <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white text-xl galloping">
+                                <i class="fas fa-horse"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сұрақ және Жауаптар -->
+            <div id="question-box" class="bg-slate-900/80 border border-indigo-500/20 rounded-2xl p-6 shadow-xl backdrop-blur-md space-y-6">
+                <!-- Сұрақ мәтіні -->
+                <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
+                    <p id="question-text" class="text-lg md:text-xl font-semibold text-center leading-relaxed">
+                        Жүктелуде...
+                    </p>
+                    <pre id="code-snippet" class="mt-4 p-3 bg-slate-900 text-sm font-mono text-emerald-400 rounded-lg overflow-x-auto border border-slate-800 hidden"></pre>
+                </div>
+
+                <!-- Жауап нұсқалары -->
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Жауаптар динамикалы түрде осында қосылады -->
+                </div>
+
+                <!-- Сұрақ нәтижесі туралы хабарлама -->
+                <div id="feedback-message" class="hidden p-4 rounded-xl text-center font-semibold transition"></div>
+            </div>
+        </div>
+
+        <!-- Жеңіс / Жеңіліс (Нәтиже) Экраны -->
+        <div id="result-screen" class="w-full max-w-md bg-slate-900/90 border border-amber-500/30 rounded-2xl p-8 shadow-2xl backdrop-blur-md text-center hidden relative overflow-hidden">
+            <!-- Салют контейнері -->
+            <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
+
+            <div id="win-content" class="hidden space-y-6">
+                <!-- Кубок эффексі -->
+                <div class="relative inline-block">
+                    <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 blur opacity-75 animate-pulse"></div>
+                    <div class="relative flex items-center justify-center w-24 h-24 bg-gradient-to-b from-yellow-300 to-amber-500 rounded-full shadow-2xl">
+                        <i class="fas fa-trophy text-5xl text-slate-950 animate-bounce"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500">
+                        БӘЙГЕ ЖЕҢІМПАЗЫ!
+                    </h2>
+                    <p class="text-slate-300 mt-2">Бас бәйге сізге бұйырды!</p>
+                </div>
+
+                <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 text-left space-y-2">
+                    <p class="text-sm text-slate-400">Шабандоз: <span id="win-player-name" class="text-white font-bold"></span></p>
+                    <p class="text-sm text-slate-400">Сұрақтар: <span id="win-score" class="text-emerald-400 font-bold"></span></p>
+                    <p class="text-sm text-slate-400">Дәрежесі: <span class="text-amber-400 font-bold">Python Сұңқары 🦅</span></p>
+                </div>
+
+                <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-300 font-medium">
+                    🏆 Салтанатты түрде құрмет кубогі табыс етілді! Сәттілік тілейміз!
+                </div>
+            </div>
+
+            <div id="lose-content" class="hidden space-y-6">
+                <div class="flex items-center justify-center w-20 h-20 bg-rose-500/10 border border-rose-500/30 rounded-full mx-auto">
+                    <i class="fas fa-redo text-3xl text-rose-500"></i>
+                </div>
+
+                <div>
+                    <h2 class="text-2xl font-bold text-rose-500">Бұл жолы сәл жетпеді...</h2>
+                    <p class="text-slate-300 mt-1">Тұлпар сізден бұрын мәреге жетті.</p>
+                </div>
+
+                <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 text-left space-y-2">
+                    <p class="text-sm text-slate-400">Шабандоз: <span id="lose-player-name" class="text-white font-bold"></span></p>
+                    <p class="text-sm text-slate-400">Сіздің нәтижеңіз: <span id="lose-score" class="text-rose-400 font-bold"></span></p>
+                </div>
+            </div>
+
+            <button id="restart-btn" class="mt-6 w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition duration-300 border border-slate-700">
+                Қайтадан көру <i class="fas fa-undo ml-2"></i>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Төменгі деректеме -->
+    <footer class="w-full text-center py-4 text-xs text-slate-500 border-t border-slate-900/60 bg-slate-950/40">
+        &copy; 2026 Python Бәйге. Оқушыларға арналған интеллектуалды бағдарлама.
+    </footer>
+
+    <!-- Скрипттер (Логика) -->
+    <script>
+        // Сұрақтар базасы (Python бойынша 7 сұрақ - Қарапайымнан күрделіге)
+        const questions = [
+            {
+                question: "Python-да экранға мәлімет шығару үшін қай функция қолданылады?",
+                options: ["input()", "print()", "output()", "write()"],
+                correct: 1,
+                snippet: null
+            },
+            {
+                question: "Төмендегі код орындалғаннан кейін x мәні неге тең болады?",
+                options: ["10", "15", "5", "Қателік туындайды"],
+                correct: 1,
+                snippet: "x = 5\nx = x + 10"
+            },
+            {
+                question: "Python-да тізім (List) құру үшін қандай жақша қолданылады?",
+                options: ["Кіші жақшалар ( )", "Жүйелі жақшалар { }", "Тік жақшалар [ ]", "Бұрыштық жақшалар < >"],
+                correct: 2,
+                snippet: null
+            },
+            {
+                question: "Мына кодтың нәтижесі қандай болады?",
+                options: ["['алма', 'алмұрт']", "['алма', 'банан', 'алмұрт']", "['банан', 'алма', 'алмұрт']", "Қателік шығады"],
+                correct: 1,
+                snippet: "fruits = ['алма', 'банан']\nfruits.append('алмұрт')\nprint(fruits)"
+            },
+            {
+                question: "Кодтың орындалу нәтижесі қандай болады?",
+                options: ["Жұп", "Тақ", "Қателік", "Нәтиже шықпайды"],
+                correct: 0,
+                snippet: "a = 12\nif a % 2 == 0:\n    print('Жұп')\nelse:\n    print('Тақ')"
+            },
+            {
+                question: "Python-да циклдардың қай түрлері бар?",
+                options: ["for, while", "do-while, loop", "repeat, until", "for, switch"],
+                correct: 0,
+                snippet: null
+            },
+            {
+                question: "Төмендегі функция шақырылғанда қандай нәтиже қайтарады?",
+                options: ["8", "15", "10", "Қателік"],
+                correct: 1,
+                snippet: "def esep(x, y=5):\n    return x + y\n\nprint(esep(10))"
+            }
+        ];
+
+        // Ойын күйі (State)
+        let playerName = "";
+        let currentQuestionIdx = 0;
+        let score = 0;
+        let playerProgress = 0; // % түрінде
+        let botProgress = 0; // % түрінде
+        let botInterval = null;
+
+        // Элементтерді алу
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const studentNameInput = document.getElementById('student-name');
+        const errorMessage = document.getElementById('error-message');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const playerDisplayName = document.getElementById('player-display-name');
+        const questionCounter = document.getElementById('question-counter');
+        const playerHorse = document.getElementById('player-horse');
+        const botHorse = document.getElementById('bot-horse');
+        const horseTag = document.getElementById('horse-tag');
+
+        const questionText = document.getElementById('question-text');
+        const codeSnippet = document.getElementById('code-snippet');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        const winContent = document.getElementById('win-content');
+        const loseContent = document.getElementById('lose-content');
+        const winPlayerName = document.getElementById('win-player-name');
+        const losePlayerName = document.getElementById('lose-player-name');
+        const winScore = document.getElementById('win-score');
+        const loseScore = document.getElementById('lose-score');
+        const confettiContainer = document.getElementById('confetti-container');
+
+        // Ойынды бастау оқиғасы
+        startBtn.addEventListener('click', () => {
+            const val = studentNameInput.value.trim();
+            if (val === "") {
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+            errorMessage.classList.add('hidden');
+            playerName = val;
+            
+            // Бастапқы күйге келтіру
+            currentQuestionIdx = 0;
+            score = 0;
+            playerProgress = 0;
+            botProgress = 0;
+            
+            playerDisplayName.textContent = playerName;
+            horseTag.textContent = playerName.split(" ")[0]; // Тек есімін көрсетеміз
+
+            // Экрандарды ауыстыру
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            resultScreen.classList.add('hidden');
+
+            updateTracks();
+            loadQuestion();
+            startBotRivalry();
+        });
+
+        // Боттың біртіндеп жүруі (Бәсекелестік тудыру үшін)
+        function startBotRivalry() {
+            if (botInterval) clearInterval(botInterval);
+            // Бот әр 4-5 секунд сайын сәл-сәл алға жылжиды (сұрақ санына байланысты теңестірілген)
+            botInterval = setInterval(() => {
+                if (botProgress < 90) { // Мәреге жақындап тоқтай тұрады
+                    const step = Math.floor(Math.random() * 8) + 4; // 4% - 12% арасында қадам
+                    botProgress = Math.min(botProgress + step, 85);
+                    updateTracks();
+                }
+            }, 3000);
+        }
+
+        // Трассадағы аттардың орнын жаңарту
+        function updateTracks() {
+            // Мәре соңына дейінгі қашықтық (80%-дан аспайды, себебі аттың ені бар)
+            const maxTrackWidth = 80; 
+            const playerLeft = (playerProgress / 100) * maxTrackWidth;
+            const botLeft = (botProgress / 100) * maxTrackWidth;
+
+            playerHorse.style.left = `${playerLeft}%`;
+            botHorse.style.left = `${botLeft}%`;
+        }
+
+        // Сұрақты жүктеу
+        function loadQuestion() {
+            feedbackMessage.classList.add('hidden');
+            feedbackMessage.textContent = "";
+            optionsContainer.innerHTML = "";
+
+            if (currentQuestionIdx >= questions.length) {
+                endGame();
+                return;
+            }
+
+            questionCounter.textContent = `${currentQuestionIdx + 1} / ${questions.length}`;
+            const currentQ = questions[currentQuestionIdx];
+
+            // Мәтін мен кодты орнату
+            questionText.textContent = currentQ.question;
+            if (currentQ.snippet) {
+                codeSnippet.textContent = currentQ.snippet;
+                codeSnippet.classList.remove('hidden');
+            } else {
+                codeSnippet.classList.add('hidden');
+            }
+
+            // Нұсқаларды құрастыру
+            currentQ.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-xl text-left font-medium transition duration-200 transform hover:scale-[1.01] active:scale-100 flex items-center space-x-3";
+                
+                // Әріптік белгілеу (А, B, C, D)
+                const letter = String.fromCharCode(65 + idx); // A, B, C, D
+                btn.innerHTML = `
+                    <span class="w-8 h-8 flex items-center justify-center bg-slate-900 border border-slate-600 rounded-lg text-amber-400 font-bold text-sm">${letter}</span>
+                    <span class="flex-grow">${opt}</span>
+                `;
+
+                btn.addEventListener('click', () => selectAnswer(idx, btn));
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // Жауапты таңдау
+        function selectAnswer(selectedIdx, selectedBtn) {
+            // Басқа нұсқаларды басуды бұғаттау
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            const currentQ = questions[currentQuestionIdx];
+            const isCorrect = selectedIdx === currentQ.correct;
+
+            if (isCorrect) {
+                score++;
+                // Ойыншы атын алға жылжыту
+                playerProgress = Math.min(playerProgress + (100 / questions.length), 100);
+                
+                selectedBtn.classList.remove('bg-slate-800', 'hover:bg-slate-700/80');
+                selectedBtn.classList.add('bg-emerald-600/30', 'border-emerald-500', 'text-emerald-300');
+                
+                feedbackMessage.innerHTML = `<i class="fas fa-check-circle mr-2"></i> Өте дұрыс! Сіздің атыңыз алға шапты!`;
+                feedbackMessage.className = "p-4 rounded-xl text-center font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400";
+            } else {
+                // Қате болған жағдайда бот алға жылжиды
+                botProgress = Math.min(botProgress + 12, 90);
+                
+                selectedBtn.classList.remove('bg-slate-800', 'hover:bg-slate-700/80');
+                selectedBtn.classList.add('bg-rose-600/30', 'border-rose-500', 'text-rose-300');
+
+                // Дұрыс жауапты жасыл түспен белгілеу
+                buttons[currentQ.correct].classList.remove('bg-slate-800');
+                buttons[currentQ.correct].classList.add('bg-emerald-600/20', 'border-emerald-500/50', 'text-emerald-400');
+
+                feedbackMessage.innerHTML = `<i class="fas fa-times-circle mr-2"></i> Қате! Тұлпар алға озып кетті!`;
+                feedbackMessage.className = "p-4 rounded-xl text-center font-semibold bg-rose-500/10 border border-rose-500/30 text-rose-400";
+            }
+
+            feedbackMessage.classList.remove('hidden');
+            updateTracks();
+
+            // Келесі сұраққа кідіріспен өту
+            setTimeout(() => {
+                currentQuestionIdx++;
+                loadQuestion();
+            }, 2000);
+        }
+
+        // Ойынның аяқталуы
+        function endGame() {
+            clearInterval(botInterval);
+            gameScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            const isWin = playerProgress >= botProgress;
+
+            if (isWin) {
+                winContent.classList.remove('hidden');
+                loseContent.classList.add('hidden');
+                winPlayerName.textContent = playerName;
+                winScore.textContent = `${score} / ${questions.length} дұрыс жауап`;
+                createConfetti();
+            } else {
+                winContent.classList.add('hidden');
+                loseContent.classList.remove('hidden');
+                losePlayerName.textContent = playerName;
+                loseScore.textContent = `${score} дұрыс жауап (${questions.length}-дан)`;
+            }
+        }
+
+        // Салют / Конфетти эффексі
+        function createConfetti() {
+            confettiContainer.innerHTML = "";
+            const colors = ['#ffd700', '#ffae19', '#fca311', '#10b981', '#3b82f6', '#ec4899'];
+            for (let i = 0; i < 60; i++) {
+                const div = document.createElement('div');
+                div.className = "confetti-piece";
+                div.style.left = `${Math.random() * 100}%`;
+                div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                div.style.animationDelay = `${Math.random() * 3}s`;
+                div.style.animationDuration = `${Math.random() * 2 + 2}s`;
+                confettiContainer.appendChild(div);
+            }
+        }
+
+        // Қайтадан бастау батырмасы
+        restartBtn.addEventListener('click', () => {
+            confettiContainer.innerHTML = "";
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            studentNameInput.value = "";
+        });
+    </script>
+</body>
+</html>
